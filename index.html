@@ -266,6 +266,13 @@
       <ul class="checklist" id="list-quit"></ul>
       <div class="hint">Отметка = «сегодня продержался, не сорвался».</div>
     </div>
+
+    <div class="card">
+      <h2>📸 Фото прогресса <span class="tag" id="selfie-count"></span></h2>
+      <div class="meals" id="selfie-today"></div>
+      <div class="hint">Каждый день одно фото — одинаковая поза, одинаковый свет. В зеркале разницы
+        не видно, а на фото через месяц — очень даже. Хранятся только на этом устройстве.</div>
+    </div>
   </section>
 
   <!-- ============ ЦЕЛИ ============ -->
@@ -373,6 +380,11 @@
     </div>
 
     <div class="card">
+      <h2>📸 Было → стало</h2>
+      <div class="meals" id="selfie-compare"></div>
+    </div>
+
+    <div class="card">
       <h2>🏅 Достижения <span class="tag" id="ach-count"></span></h2>
       <div class="ach-grid" id="ach-grid"></div>
     </div>
@@ -385,8 +397,8 @@
         <input type="file" id="import-file" accept=".json" style="display:none">
       </div>
       <div class="hint">Данные хранятся только в этом браузере. Чтобы перенести прогресс на другое
-        устройство — сделай экспорт здесь и импорт там. Фото еды в файл экспорта не входят —
-        они остаются на своём устройстве.</div>
+        устройство — сделай экспорт здесь и импорт там. Фото (еда и прогресс) в файл экспорта
+        не входят — они остаются на своём устройстве.</div>
     </div>
   </section>
 </div>
@@ -402,6 +414,7 @@
 </nav>
 
 <input type="file" id="food-file" accept="image/*" style="display:none">
+<input type="file" id="selfie-file" accept="image/*" style="display:none">
 <canvas id="confetti"></canvas>
 <div class="toast" id="toast"></div>
 
@@ -472,6 +485,7 @@ function migrate(){
   if (db.settings.vibro===undefined) db.settings.vibro = true;
   if (!db.unlocked) db.unlocked = {};
   if (!db.food) db.food = {};
+  if (!db.selfies) db.selfies = {};
   save();
 }
 migrate();
@@ -602,7 +616,8 @@ function xpTotal(){
   Object.values(db.food).forEach(rec=>{
     for(const m in rec){ food+=10; if(rec[m]!=='unrated') food+=5; }
   });
-  return totalChecks()*10 + perfectDaysCount()*50 + steps*25 + food;
+  return totalChecks()*10 + perfectDaysCount()*50 + steps*25 + food
+    + Object.keys(db.selfies).length*10;
 }
 function levelInfo(){
   const xp=xpTotal(); let lvl=1, rem=xp, need=100;
@@ -622,6 +637,8 @@ const ACH=[
   {id:'goal1',    em:'🎯', nm:'Цель достигнута',   ds:'Заверши все шаги любой цели',            test:()=>db.goals.some(g=>g.steps.length&&g.steps.every(s=>s.done))},
   {id:'food1',    em:'🍳', nm:'Первое фото еды',   ds:'Добавь фото завтрака или ужина',         test:()=>Object.keys(db.food).length>0},
   {id:'food7',    em:'🥗', nm:'Неделя питания',    ds:'7 дней подряд: и завтрак, и ужин',       test:()=>foodStreak()>=7},
+  {id:'selfie1',  em:'📸', nm:'Точка отсчёта',     ds:'Первое фото прогресса',                  test:()=>Object.keys(db.selfies).length>0},
+  {id:'selfie30', em:'🎞', nm:'30 кадров',         ds:'30 фото прогресса — месяц истории',      test:()=>Object.keys(db.selfies).length>=30},
   {id:'checks100',em:'💯', nm:'100 отметок',       ds:'Сто отметок суммарно',                   test:()=>totalChecks()>=100},
   {id:'lvl5',     em:'👑', nm:'Уровень 5',         ds:'Набери опыт до 5 уровня',                test:()=>levelInfo().lvl>=5},
 ];
@@ -1129,6 +1146,84 @@ function renderFood(){
   renderFoodHistory();
 }
 
+/* ================= фото прогресса ================= */
+let selfieTarget=null;
+document.getElementById('selfie-file').addEventListener('change',async e=>{
+  const f=e.target.files[0]; e.target.value='';
+  if(!f||!selfieTarget) return;
+  const {day,x,y}=selfieTarget; selfieTarget=null;
+  try{
+    const blob=await compressImage(f);
+    const key='selfie-'+day;
+    await photoPut(key,blob);
+    dropPhotoURL(key);
+    const isNew=!db.selfies[day];
+    db.selfies[day]=true;
+    save();
+    if(isNew){ burst(x,y); sndPop(); floatXP(x,y,'+10 XP'); }
+    render();
+  }catch(err){ alert('Не получилось обработать фото, попробуй другое.'); }
+});
+
+function renderSelfies(){
+  const day=todayKey();
+  const days=Object.keys(db.selfies).sort();
+  document.getElementById('selfie-count').textContent = days.length ? days.length+' фото' : '';
+
+  // сегодня + последнее предыдущее
+  const prev=[...days].reverse().find(d=>d<day);
+  const has=!!db.selfies[day];
+  const box=document.getElementById('selfie-today');
+  box.innerHTML=`
+    <div class="meal ${has?'filled':''}" id="selfie-slot">
+      <div class="shot" id="selfie-shot">${has?'':'📸'}</div>
+      <div class="cap">Сегодня${has?'':' — нажми и добавь фото'}</div>
+      ${has?'<div class="rate"><button data-del="1" title="Удалить фото">✕</button></div>':''}
+    </div>
+    ${prev?`<div class="meal filled" style="cursor:default">
+      <div class="shot" id="selfie-prev-shot"></div>
+      <div class="cap">Прошлое · ${shortDate(prev)}</div>
+    </div>`:`<div class="meal" style="cursor:default;opacity:.55">
+      <div class="shot">🕰</div><div class="cap">Тут появится прошлое фото</div>
+    </div>`}`;
+  if(has) photoURL('selfie-'+day).then(u=>{
+    const s=document.getElementById('selfie-shot');
+    if(u&&s) s.innerHTML='<img src="'+u+'" alt="">';
+  });
+  if(prev) photoURL('selfie-'+prev).then(u=>{
+    const s=document.getElementById('selfie-prev-shot');
+    if(u&&s) s.innerHTML='<img src="'+u+'" alt="">';
+  });
+  document.getElementById('selfie-slot').addEventListener('click',e=>{
+    if(e.target.closest('[data-del]')){
+      if(confirm('Удалить сегодняшнее фото?')){
+        photoDel('selfie-'+day); dropPhotoURL('selfie-'+day);
+        delete db.selfies[day];
+        save(); render();
+      }
+      return;
+    }
+    const r=e.currentTarget.getBoundingClientRect();
+    selfieTarget={day, x:r.left+r.width/2, y:r.top+r.height/2};
+    document.getElementById('selfie-file').click();
+  });
+
+  // было → стало
+  const cmp=document.getElementById('selfie-compare');
+  if(days.length<2){
+    cmp.innerHTML='<div class="empty" style="grid-column:1/-1">Сделай хотя бы два фото в разные дни — здесь появится сравнение.</div>';
+  } else {
+    const first=days[0], last=days[days.length-1];
+    cmp.innerHTML=`
+      <div class="meal filled" style="cursor:default"><div class="shot" id="cmp-first"></div>
+        <div class="cap">Было · ${shortDate(first)}</div></div>
+      <div class="meal filled" style="cursor:default"><div class="shot" id="cmp-last"></div>
+        <div class="cap">Стало · ${shortDate(last)}</div></div>`;
+    photoURL('selfie-'+first).then(u=>{ const s=document.getElementById('cmp-first'); if(u&&s) s.innerHTML='<img src="'+u+'" alt="">'; });
+    photoURL('selfie-'+last).then(u=>{ const s=document.getElementById('cmp-last'); if(u&&s) s.innerHTML='<img src="'+u+'" alt="">'; });
+  }
+}
+
 /* ================= статистика ================= */
 function weekStart(day){ // понедельник
   const d=parseKey(day);
@@ -1245,6 +1340,7 @@ function render(){
   renderGoals();
   renderManage();
   renderFood();
+  renderSelfies();
   renderStats();
   renderAch();
 }
