@@ -220,6 +220,25 @@
   .menu-row .pr{flex:1;min-width:0}
   .menu-row .pr small{display:block;color:var(--muted);font-size:.76rem}
 
+  /* ---------- спорт / плеер ---------- */
+  .timer-big{font-size:3.4rem;font-weight:700;text-align:center;
+    font-variant-numeric:tabular-nums;line-height:1.1;margin:12px 0}
+  .timer-big.rest{color:var(--gold)}
+  .ex-name{font-size:1.15rem;font-weight:700}
+  .set-info{color:var(--muted);font-size:.9rem;margin-top:3px}
+  .pose-img{width:100%;max-height:300px;object-fit:contain;border-radius:12px;
+    display:block;margin:10px 0;background:var(--card-2)}
+  .player-controls{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .player-controls .btn{flex:1;min-width:120px}
+  .wk-bar{height:6px;background:var(--card-2);border-radius:99px;overflow:hidden;margin:10px 0 4px}
+  .wk-bar div{height:100%;border-radius:99px;transition:width .3s ease;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+  ul.ex-list{list-style:none;margin:8px 0}
+  ul.ex-list li{display:flex;justify-content:space-between;gap:10px;padding:7px 2px;
+    border-bottom:1px solid var(--border);font-size:.9rem}
+  ul.ex-list li:last-child{border-bottom:none}
+  ul.ex-list li span:last-child{color:var(--muted);white-space:nowrap}
+
   .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
     background:var(--card-2);border:1px solid var(--border);color:var(--text);
     padding:10px 18px;border-radius:12px;font-size:.85rem;opacity:0;pointer-events:none;
@@ -313,11 +332,76 @@
     </div>
   </section>
 
+  <!-- ============ СПОРТ ============ -->
+  <section class="page" id="page-sport">
+    <div class="card" id="sport-today"></div>
+
+    <div class="card">
+      <h2>Неделя <span class="tag">сила · кардио · мобильность</span></h2>
+      <div id="sport-week"></div>
+      <div class="hint">Нагрузка чередуется, чтобы тело успевало восстанавливаться.
+        По пятницам Сила A и Сила B меняются через неделю — трекер сам следит.</div>
+    </div>
+
+    <div class="card">
+      <h2>Прогрессия без железа</h2>
+      <details class="rec">
+        <summary>Что усложнять первым, когда стало легко</summary>
+        <div class="body">
+          <p><b>1.</b> Больше повторов — до ~20 в подходе</p>
+          <p><b>2.</b> Медленнее — опускайся на 3–4 счёта</p>
+          <p><b>3.</b> Пауза 1–2 сек в нижней точке</p>
+          <p><b>4.</b> Сложнее вариант: от стены → от стола → от пола → ноги выше; с двух ног → на одной</p>
+          <p><b>5.</b> Меньше отдыха между подходами, потом +1 подход</p>
+          <p>🎒 <b>Лайфхак:</b> рюкзак с книгами или бутылками воды — готовый вес для приседаний,
+            выпадов и тяг, когда веса тела станет мало.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Заметки</h2>
+      <details class="rec">
+        <summary>Взвешивание · вода · как не перегореть</summary>
+        <div class="body">
+          <p><b>Взвешивание.</b> Всегда одинаково: утром, после туалета, до еды. После тренировки
+            минус 1–2 кг — это вода от пота, не жир. Смотри динамику по неделям, не по дням.</p>
+          <p><b>Вода и соль.</b> Жара + активность = пей весь день, не только на тренировке.
+            Сильно потеешь — щепотка соли в воду или электролиты после игры.</p>
+          <p><b>Слушай тело.</b> Дефицит ~800–900 ккал + новые тренировки — это бодро. Накрывает
+            усталость или зверский голод — не терпи: добавь риса в обед или греческий йогурт.
+            Лучше чуть медленнее, но без срывов.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
   <!-- ============ ЕДА ============ -->
   <section class="page" id="page-food">
     <div class="card">
       <h2>👨‍🍳 Сегодня готовим <span class="tag" id="plan-day-tag"></span></h2>
       <div id="plan-today"></div>
+    </div>
+
+    <div class="card">
+      <h2>🥤 Завтрак — смузи <span class="tag">~630 ккал · 41 г белка</span></h2>
+      <div class="hint" style="margin-top:0">Ягоды 90 г + мороженый банан + молоко 2% 300 мл +
+        протеин 30 г + овсянка 40 г + молотая чиа 10–15 г + креатин 5 г. Всё в блендер, пить
+        свежим — через 20 минут чиа загустит до пудинга.</div>
+      <details class="rec">
+        <summary>Калории дня и рычаги подстройки</summary>
+        <div class="body">
+          <p><b>Завтрак</b> ~630 ккал · 41 г белка</p>
+          <p><b>Обед (работа)</b> bowl сам собираешь ~600 ккал · готовое с соусом 750–900 ккал</p>
+          <p><b>Ужин</b> рис + белок + овощи ~635 ккал · 53 г белка</p>
+          <p><b>Итого</b> ~1 900–2 150 ккал · ~130 г белка → дефицит ~800–900 ккал,
+            темп ~0,7–0,9 кг/нед. Белок бережёт мышцы — уходит жир.</p>
+          <p><b>Рычаги:</b> порция риса (100 г готового ≈ 130 ккал) и обеденный соус
+            (в нём прячется 150–250 ккал).</p>
+          <p><b>Чиа:</b> первую неделю 10 г, потом 15 г. По-китайски: 奇亚籽粉
+            (обязательно с 粉 в конце — иначе пришлют целые семена).</p>
+        </div>
+      </details>
     </div>
 
     <div class="card">
@@ -408,6 +492,7 @@
     <button data-page="today" class="active"><span class="ico">✅</span>Сегодня</button>
     <button data-page="goals"><span class="ico">🎯</span>Цели</button>
     <button data-page="habits"><span class="ico">🔁</span>Привычки</button>
+    <button data-page="sport"><span class="ico">💪</span>Спорт</button>
     <button data-page="food"><span class="ico">🍽</span>Еда</button>
     <button data-page="stats"><span class="ico">📊</span>Статистика</button>
   </div>
@@ -486,6 +571,7 @@ function migrate(){
   if (!db.unlocked) db.unlocked = {};
   if (!db.food) db.food = {};
   if (!db.selfies) db.selfies = {};
+  if (!db.workouts) db.workouts = {};
   save();
 }
 migrate();
@@ -617,7 +703,8 @@ function xpTotal(){
     for(const m in rec){ food+=10; if(rec[m]!=='unrated') food+=5; }
   });
   return totalChecks()*10 + perfectDaysCount()*50 + steps*25 + food
-    + Object.keys(db.selfies).length*10;
+    + Object.keys(db.selfies).length*10
+    + Object.keys(db.workouts).length*40;
 }
 function levelInfo(){
   const xp=xpTotal(); let lvl=1, rem=xp, need=100;
@@ -639,6 +726,8 @@ const ACH=[
   {id:'food7',    em:'🥗', nm:'Неделя питания',    ds:'7 дней подряд: и завтрак, и ужин',       test:()=>foodStreak()>=7},
   {id:'selfie1',  em:'📸', nm:'Точка отсчёта',     ds:'Первое фото прогресса',                  test:()=>Object.keys(db.selfies).length>0},
   {id:'selfie30', em:'🎞', nm:'30 кадров',         ds:'30 фото прогресса — месяц истории',      test:()=>Object.keys(db.selfies).length>=30},
+  {id:'wk1',      em:'💪', nm:'Первая тренировка', ds:'Заверши тренировку в плеере',            test:()=>Object.keys(db.workouts).length>=1},
+  {id:'wk10',     em:'🏋️', nm:'10 тренировок',     ds:'Десять завершённых тренировок',          test:()=>Object.keys(db.workouts).length>=10},
   {id:'checks100',em:'💯', nm:'100 отметок',       ds:'Сто отметок суммарно',                   test:()=>totalChecks()>=100},
   {id:'lvl5',     em:'👑', nm:'Уровень 5',         ds:'Набери опыт до 5 уровня',                test:()=>levelInfo().lvl>=5},
 ];
@@ -1146,6 +1235,257 @@ function renderFood(){
   renderFoodHistory();
 }
 
+/* ================= спорт ================= */
+const EX_A=[
+  {n:'Приседания (вес тела)', reps:'12–15', tip:'Пятки на полу, колени за носками, спина ровная'},
+  {n:'Отжимания', reps:'8–12', tip:'Начни от стола или стены, со временем — от пола'},
+  {n:'Тяга под столом', reps:'8–12', tip:'Ляг под крепкий стол, тяни грудь к краю столешницы'},
+  {n:'Ягодичный мостик', reps:'12–15', tip:'Позже — вариант на одной ноге'},
+  {n:'Планка', reps:'30–45 сек', hold:40, tip:'Тело одной линией, не проваливай поясницу'},
+];
+const EX_B=[
+  {n:'Выпады назад', reps:'10 на ногу', tip:'Позже — болгарские: задняя нога на стуле'},
+  {n:'«Щучьи» отжимания', reps:'8–10', tip:'Таз вверх буквой Λ, жмём плечами'},
+  {n:'Румынская тяга на одной ноге', reps:'10 на ногу', tip:'Наклон с балансом, спина прямая'},
+  {n:'Отжимания, ноги на возвышении', reps:'8–12', tip:'Или алмазные отжимания'},
+  {n:'Боковая планка / «мёртвый жук»', reps:'30 сек на сторону', hold:30, tip:'Каждую сторону отдельным подходом'},
+];
+const POSES=[
+  {n:'Кошка-корова', img:'images/01-cat-cow.jpg', secs:60, sides:1, lbl:'6–8 циклов',
+   cue:'Вдох — прогиб, взгляд вперёд; выдох — округлить спину, подбородок к груди. Медленно, за дыханием.',
+   tip:'Колени чувствительны — подложи плед.'},
+  {n:'Собака мордой вниз', img:'images/02-downward-dog.jpg', secs:25, sides:1, lbl:'20–30 сек',
+   cue:'Тело буквой Λ: таз вверх и назад, спина длинная, шея расслаблена.',
+   tip:'Сильно согни колени, пятки на пол не обязательны. Тяжело запястьям — руки на стул.'},
+  {n:'Низкий выпад, руки вверх', img:'images/03-low-lunge.jpg', secs:25, sides:2, lbl:'20–30 сек × 2',
+   cue:'Колено задней ноги на полу, таз подаёшь вперёд-вниз, руки тянутся вверх. Главная поза после велика и сидячей работы.',
+   tip:'Плед под заднее колено. Шатает — руки на переднее бедро.'},
+  {n:'Наклон к ногам стоя', img:'images/04-forward-fold.jpg', secs:25, sides:1, lbl:'20–30 сек',
+   cue:'Складывайся от бёдер вниз, шея и руки расслаблены — просто висни.',
+   tip:'Сильно согни колени, руки на голени. До пола доставать не нужно.'},
+  {n:'Голубь', img:'images/05-pigeon.jpg', secs:30, sides:2, lbl:'30 сек × 2',
+   cue:'Передняя нога согнута перед собой, задняя вытянута назад, таз ровно, спина вверх.',
+   tip:'Подушка под ягодицу передней ноги. Дискомфорт в колене — замени на «фигуру-4» лёжа.'},
+  {n:'Нитка в иголку', img:'images/06-thread-the-needle.jpg', secs:25, sides:2, lbl:'20–30 сек × 2',
+   cue:'С четверенек продень руку под себя в сторону, плечо и висок опусти на пол.',
+   tip:'Шее неудобно — подложи подушку или ладонь.'},
+  {n:'Скручивание лёжа', img:'images/07-supine-twist.jpg', secs:30, sides:2, lbl:'30 сек × 2',
+   cue:'Лёжа на спине колени уводишь в сторону, руки раскинуты, взгляд в противоположную.',
+   tip:'Подушка между колен. Колено на пол не заставляй.'},
+  {n:'Счастливый ребёнок', img:'images/08-happy-baby.jpg', secs:30, sides:1, lbl:'30 сек',
+   cue:'Колени к подмышкам, возьмись за стопы снаружи, поясница на полу, мягко покачивайся.',
+   tip:'Не достаёшь до стоп — держись за голени.'},
+  {n:'Финиш: полежи и подыши', img:null, secs:90, sides:1, lbl:'1–2 мин',
+   cue:'Просто лежи на спине и ровно дыши. Это часть тренировки, не пропускай.',
+   tip:''},
+];
+const REST_SEC=60;
+
+function weekParity(){
+  const d=new Date(); // ISO-неделя по алгоритму четверга
+  const t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  t.setDate(t.getDate()+3-((t.getDay()+6)%7));
+  const w1=new Date(t.getFullYear(),0,4);
+  const wn=1+Math.round(((t-w1)/864e5-3+((w1.getDay()+6)%7))/7);
+  return wn%2;
+}
+function scheduleFor(dayIdx){ // 0=Пн
+  const friKind=weekParity()===0?'A':'B';
+  return [
+    {t:'Сила A · всё тело', k:'A', d:'~40 мин · 5 упражнений × 3 подхода'},
+    {t:'Кардио — велосипед', k:'cardio', d:'30–45 мин в темпе, где можешь говорить, но дыхание учащено'},
+    {t:'Сила B · всё тело', k:'B', d:'~40 мин · 5 упражнений × 3 подхода'},
+    {t:'Мобильность и растяжка', k:'mob', d:'~20 мин · 9 поз с таймером, тянись до натяжения, не до боли'},
+    {t:'Сила '+friKind+' · всё тело', k:friKind, d:'~40 мин · чередуется по неделям'},
+    {t:'Теннис + велик', k:'cardio', d:'В удовольствие · естественные интервалы'},
+    {t:'Отдых', k:'rest', d:'Или лёгкая растяжка, если хочется'},
+  ][dayIdx];
+}
+
+let session=null, sTimer=null;
+function fmtSec(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function stopTick(){ if(sTimer){ clearInterval(sTimer); sTimer=null; } }
+function tickEvery(fn){ stopTick(); sTimer=setInterval(fn,1000); }
+
+function startWorkout(kind){
+  if(kind==='A'||kind==='B')
+    session={kind, list:kind==='A'?EX_A:EX_B, ex:0, set:1, mode:'work', left:0};
+  else if(kind==='mob')
+    session={kind, ex:0, side:1, mode:'pose', left:POSES[0].secs, paused:false};
+  else
+    session={kind:'cardio', mode:'cardio', elapsed:0, paused:false};
+  if(session.mode==='pose'||session.mode==='cardio') runSessionTimer();
+  drawPlayer();
+}
+function runSessionTimer(){
+  tickEvery(()=>{
+    if(!session||session.paused) return;
+    if(session.mode==='cardio'){ session.elapsed++; updTimerEl(fmtSec(session.elapsed)); return; }
+    session.left--;
+    if(session.left>0){ updTimerEl(fmtSec(session.left)); return; }
+    sndPop();
+    if(session.mode==='rest'){ session.mode='work'; stopTick(); drawPlayer(); return; }
+    if(session.mode==='hold'){ completeSet(); return; }
+    if(session.mode==='pose'){
+      const p=POSES[session.ex];
+      if(p.sides===2 && session.side===1){ session.side=2; session.left=p.secs; toast('Вторая сторона'); drawPlayer(); return; }
+      nextPose();
+    }
+  });
+}
+function updTimerEl(txt){ const el=document.getElementById('t-big'); if(el) el.textContent=txt; }
+function nextPose(){
+  session.ex++;
+  if(session.ex>=POSES.length){ finishWorkout(); return; }
+  session.side=1; session.left=POSES[session.ex].secs;
+  drawPlayer();
+}
+function completeSet(){
+  const ex=session.list[session.ex];
+  if(session.set<3){
+    session.set++;
+    session.mode='rest'; session.left=REST_SEC; runSessionTimer();
+  } else {
+    session.ex++; session.set=1;
+    if(session.ex>=session.list.length){ finishWorkout(); return; }
+    session.mode='rest'; session.left=REST_SEC; runSessionTimer();
+  }
+  drawPlayer();
+}
+function finishWorkout(){
+  stopTick();
+  const kind=session.kind; session=null;
+  db.workouts[todayKey()]={kind};
+  // автоотметка привычки «тренировка»
+  const h=db.habits.find(x=>/трениров|зарядк/i.test(x.name));
+  let extra='';
+  if(h && !checked(todayKey(),h.id)){ setCheck(todayKey(),h.id,true); extra=' Привычка «'+h.name+'» отмечена.'; }
+  save();
+  toast('🏆 Тренировка завершена! +40 XP.'+extra);
+  rain(); sndTada();
+  render();
+}
+function quitWorkout(){
+  if(confirm('Прервать тренировку? Прогресс этой сессии не сохранится.')){
+    stopTick(); session=null; renderSport();
+  }
+}
+
+function drawPlayer(){
+  const box=document.getElementById('sport-today');
+  if(!session){ renderSport(); return; }
+  let inner='';
+  if(session.mode==='cardio'){
+    inner=`<h2>🚴 Кардио <span class="tag">секундомер</span></h2>
+      <div class="timer-big" id="t-big">${fmtSec(session.elapsed)}</div>
+      <div class="hint" style="text-align:center;margin-top:0">Цель: 30–45 минут. Темп разговорный,
+        дыхание учащено. После — можно круг растяжки как заминку.</div>
+      <div class="player-controls">
+        <button class="btn ghost" id="pl-pause">${session.paused?'▶ Продолжить':'⏸ Пауза'}</button>
+        <button class="btn" id="pl-done">Завершить ✓</button>
+        <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
+      </div>`;
+  } else if(session.kind==='mob'){
+    const p=POSES[session.ex];
+    const total=POSES.reduce((a,x)=>a+x.secs*x.sides,0);
+    let passed=0; for(let i=0;i<session.ex;i++) passed+=POSES[i].secs*POSES[i].sides;
+    if(session.side===2) passed+=p.secs;
+    inner=`<h2>🧘 Мобильность <span class="tag">${session.ex+1} из ${POSES.length}</span></h2>
+      <div class="wk-bar"><div style="width:${Math.round(passed/total*100)}%"></div></div>
+      <div class="ex-name">${p.n}${p.sides===2?' · сторона '+session.side:''}</div>
+      <div class="set-info">${p.lbl}</div>
+      ${p.img?'<img class="pose-img" src="'+p.img+'" alt="">':''}
+      <div class="timer-big" id="t-big">${fmtSec(session.left)}</div>
+      <div class="hint" style="margin-top:0">${p.cue}${p.tip?'<br>💡 '+p.tip:''}</div>
+      <div class="player-controls">
+        <button class="btn ghost" id="pl-pause">${session.paused?'▶ Продолжить':'⏸ Пауза'}</button>
+        <button class="btn ghost" id="pl-plus">+15 сек</button>
+        <button class="btn" id="pl-skip">Дальше →</button>
+        <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
+      </div>`;
+  } else {
+    const ex=session.list[session.ex];
+    const total=session.list.length*3;
+    const done=session.ex*3+(session.set-1);
+    if(session.mode==='rest'){
+      inner=`<h2>💪 Сила ${session.kind} <span class="tag">отдых</span></h2>
+        <div class="wk-bar"><div style="width:${Math.round(done/total*100)}%"></div></div>
+        <div class="ex-name" style="color:var(--muted)">Отдышись 🌬</div>
+        <div class="set-info">дальше: ${ex.n} — подход ${session.set} из 3</div>
+        <div class="timer-big rest" id="t-big">${fmtSec(session.left)}</div>
+        <div class="player-controls">
+          <button class="btn" id="pl-skiprest">Пропустить отдых →</button>
+          <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
+        </div>`;
+    } else {
+      inner=`<h2>💪 Сила ${session.kind} <span class="tag">${session.ex+1} из ${session.list.length}</span></h2>
+        <div class="wk-bar"><div style="width:${Math.round(done/total*100)}%"></div></div>
+        <div class="ex-name">${ex.n}</div>
+        <div class="set-info">Подход ${session.set} из 3 · ${ex.reps}</div>
+        <div class="hint" style="margin-top:6px">💡 ${ex.tip}</div>
+        <div class="player-controls">
+          ${ex.hold
+            ? '<button class="btn" id="pl-hold">▶ Держать '+ex.hold+' сек</button>'
+            : '<button class="btn" id="pl-set">✓ Подход выполнен</button>'}
+          <button class="btn ghost" id="pl-skipex">Пропустить упражнение</button>
+          <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
+        </div>`;
+    }
+  }
+  box.innerHTML=inner;
+  const on=(id,fn)=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',fn); };
+  on('pl-quit',quitWorkout);
+  on('pl-set',()=>{ sndPop(); completeSet(); });
+  on('pl-hold',()=>{ session.mode='hold'; session.left=session.list[session.ex].hold; runSessionTimer(); drawPlayer(); });
+  on('pl-skiprest',()=>{ session.mode='work'; stopTick(); drawPlayer(); });
+  on('pl-skipex',()=>{ session.ex++; session.set=1;
+    if(session.ex>=session.list.length){ finishWorkout(); } else { session.mode='work'; stopTick(); drawPlayer(); } });
+  on('pl-pause',()=>{ session.paused=!session.paused; drawPlayer(); });
+  on('pl-plus',()=>{ session.left+=15; updTimerEl(fmtSec(session.left)); });
+  on('pl-skip',()=>{ const p=POSES[session.ex];
+    if(p.sides===2&&session.side===1){ session.side=2; session.left=p.secs; drawPlayer(); } else nextPose(); });
+  on('pl-done',finishWorkout);
+}
+
+function renderSport(){
+  if(session) return; // плеер управляет карточкой сам
+  const box=document.getElementById('sport-today');
+  const idx=(new Date().getDay()+6)%7;
+  const s=scheduleFor(idx);
+  const doneToday=!!db.workouts[todayKey()];
+  let body='';
+  if(doneToday){
+    body='<div class="empty">🏆 Тренировка на сегодня выполнена. Отдыхай — или сделай ещё круг растяжки.</div>'+
+      '<div class="player-controls"><button class="btn ghost" id="start-mob">🧘 Круг мобильности</button></div>';
+  } else if(s.k==='rest'){
+    body='<div class="empty">Сегодня отдых. Тело растёт именно в такие дни. Хочется подвигаться — сделай лёгкую растяжку.</div>'+
+      '<div class="player-controls"><button class="btn ghost" id="start-mob">🧘 Лёгкая растяжка</button></div>';
+  } else if(s.k==='A'||s.k==='B'){
+    const list=s.k==='A'?EX_A:EX_B;
+    body='<ul class="ex-list">'+list.map(e=>'<li><span>'+e.n+'</span><span>3 × '+e.reps+'</span></li>').join('')+'</ul>'+
+      '<div class="hint">Разминка: 5 мин лёгкого кардио + махи руками и ногами. Между подходами — таймер отдыха '+REST_SEC+' сек, я сам посчитаю.</div>'+
+      '<div class="player-controls"><button class="btn" id="start-wk">▶ Начать тренировку</button></div>';
+  } else if(s.k==='mob'){
+    body='<div class="hint" style="margin-top:0">9 поз по порядку с таймерами и картинками. Тянись до натяжения, не до боли, дыши глубоко.</div>'+
+      '<div class="player-controls"><button class="btn" id="start-mob">▶ Начать растяжку</button></div>';
+  } else {
+    body='<div class="hint" style="margin-top:0">'+s.d+'. Низкая нагрузка на колени — то, что нужно. Бонус: 10 мин быстрой ходьбы после еды.</div>'+
+      '<div class="player-controls"><button class="btn" id="start-cardio">▶ Запустить секундомер</button></div>';
+  }
+  box.innerHTML='<h2>Сегодня: '+s.t+' <span class="tag">'+DW[idx]+'</span></h2>'+
+    (doneToday?'':'<div class="hint" style="margin-top:0">'+s.d+'</div>')+body;
+  const on=(id,fn)=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',fn); };
+  on('start-wk',()=>startWorkout(s.k));
+  on('start-mob',()=>startWorkout('mob'));
+  on('start-cardio',()=>startWorkout('cardio'));
+
+  document.getElementById('sport-week').innerHTML=[0,1,2,3,4,5,6].map(i=>{
+    const x=scheduleFor(i);
+    return '<div class="menu-row '+(i===idx?'today':'')+'"><div class="dw">'+DW[i]+'</div>'+
+      '<div class="pr"><b>'+x.t+'</b><small>'+x.d+'</small></div></div>';
+  }).join('');
+}
+
 /* ================= фото прогресса ================= */
 let selfieTarget=null;
 document.getElementById('selfie-file').addEventListener('change',async e=>{
@@ -1339,6 +1679,7 @@ function render(){
   lastToggled=null;
   renderGoals();
   renderManage();
+  renderSport();
   renderFood();
   renderSelfies();
   renderStats();
