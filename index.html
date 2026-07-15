@@ -199,6 +199,27 @@
   .food-day .th .em{position:absolute;right:2px;bottom:1px;font-size:.85rem;
     text-shadow:0 1px 3px rgba(0,0,0,.6)}
 
+  /* ---------- галерея и просмотр ---------- */
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .gal-item{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;
+    background:var(--card-2);cursor:pointer}
+  .gal-item img{width:100%;height:100%;object-fit:cover;display:block}
+  .gal-item .dt{position:absolute;bottom:0;left:0;right:0;font-size:.62rem;text-align:center;
+    padding:2px 0;background:rgba(0,0,0,.55);color:#fff}
+  #lightbox{position:fixed;inset:0;background:rgba(8,10,14,.95);z-index:300;display:none;
+    flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    padding:20px 12px calc(20px + env(safe-area-inset-bottom))}
+  #lightbox.open{display:flex}
+  #lb-img{max-width:94vw;max-height:72vh;border-radius:14px;object-fit:contain}
+  #lb-cap{color:var(--text);font-size:.9rem}
+  #lb-cap small{color:var(--muted);display:block;text-align:center;margin-top:2px}
+  .lb-nav{display:flex;gap:10px;align-items:center}
+  .lb-nav button{background:var(--card-2);border:1px solid var(--border);color:var(--text);
+    border-radius:12px;font-family:inherit;font-size:1rem;padding:9px 16px;cursor:pointer}
+  .lb-nav button:disabled{opacity:.3}
+  #lb-close{position:absolute;top:16px;right:16px;background:var(--card-2);border:1px solid var(--border);
+    color:var(--text);width:40px;height:40px;border-radius:12px;font-size:1.05rem;cursor:pointer}
+
   /* ---------- план питания ---------- */
   .dish{font-size:1.08rem;font-weight:700}
   details.rec{margin-top:10px;background:var(--card-2);border-radius:12px;padding:10px 12px}
@@ -469,6 +490,11 @@
     </div>
 
     <div class="card">
+      <h2>🎞 Все фото <span class="tag" id="gal-count"></span></h2>
+      <div class="gallery" id="selfie-gallery"></div>
+    </div>
+
+    <div class="card">
       <h2>🏅 Достижения <span class="tag" id="ach-count"></span></h2>
       <div class="ach-grid" id="ach-grid"></div>
     </div>
@@ -500,6 +526,16 @@
 
 <input type="file" id="food-file" accept="image/*" style="display:none">
 <input type="file" id="selfie-file" accept="image/*" style="display:none">
+<div id="lightbox">
+  <button id="lb-close">✕</button>
+  <img id="lb-img" alt="">
+  <div id="lb-cap"></div>
+  <div class="lb-nav">
+    <button id="lb-prev">‹</button>
+    <button id="lb-del">🗑 Удалить</button>
+    <button id="lb-next">›</button>
+  </div>
+</div>
 <canvas id="confetti"></canvas>
 <div class="toast" id="toast"></div>
 
@@ -1562,7 +1598,64 @@ function renderSelfies(){
     photoURL('selfie-'+first).then(u=>{ const s=document.getElementById('cmp-first'); if(u&&s) s.innerHTML='<img src="'+u+'" alt="">'; });
     photoURL('selfie-'+last).then(u=>{ const s=document.getElementById('cmp-last'); if(u&&s) s.innerHTML='<img src="'+u+'" alt="">'; });
   }
+
+  // галерея всех фото (новые сверху)
+  const gal=document.getElementById('selfie-gallery');
+  const galDays=[...days].reverse();
+  document.getElementById('gal-count').textContent = days.length ? days.length+' фото' : '';
+  if(!galDays.length){
+    gal.innerHTML='<div class="empty" style="grid-column:1/-1">Здесь соберётся вся история твоих фото.</div>';
+  } else {
+    gal.innerHTML=galDays.map(d=>`<div class="gal-item" data-day="${d}"><div class="dt">${shortDate(d)}</div></div>`).join('');
+    gal.querySelectorAll('.gal-item').forEach(async it=>{
+      const u=await photoURL('selfie-'+it.dataset.day);
+      if(u) it.insertAdjacentHTML('afterbegin','<img src="'+u+'" alt="">');
+      it.addEventListener('click',()=>openLightbox(it.dataset.day));
+    });
+  }
 }
+
+/* ---- полноэкранный просмотр ---- */
+let lbDays=[], lbIdx=0;
+const lbEl=document.getElementById('lightbox');
+async function showLB(){
+  const day=lbDays[lbIdx];
+  const u=await photoURL('selfie-'+day);
+  document.getElementById('lb-img').src=u||'';
+  const d=parseKey(day);
+  document.getElementById('lb-cap').innerHTML =
+    d.getDate()+' '+RU_MON[d.getMonth()]+' '+d.getFullYear()+
+    '<small>фото '+(lbIdx+1)+' из '+lbDays.length+'</small>';
+  document.getElementById('lb-prev').disabled = lbIdx===0;
+  document.getElementById('lb-next').disabled = lbIdx===lbDays.length-1;
+}
+function openLightbox(day){
+  lbDays=Object.keys(db.selfies).sort();
+  lbIdx=Math.max(0,lbDays.indexOf(day));
+  lbEl.classList.add('open');
+  showLB();
+}
+function closeLightbox(){ lbEl.classList.remove('open'); }
+document.getElementById('lb-close').addEventListener('click',closeLightbox);
+lbEl.addEventListener('click',e=>{ if(e.target===lbEl) closeLightbox(); });
+document.getElementById('lb-prev').addEventListener('click',()=>{ if(lbIdx>0){ lbIdx--; showLB(); } });
+document.getElementById('lb-next').addEventListener('click',()=>{ if(lbIdx<lbDays.length-1){ lbIdx++; showLB(); } });
+document.getElementById('lb-del').addEventListener('click',()=>{
+  const day=lbDays[lbIdx];
+  if(!confirm('Удалить фото за '+shortDate(day)+'?')) return;
+  photoDel('selfie-'+day); dropPhotoURL('selfie-'+day);
+  delete db.selfies[day]; save();
+  lbDays.splice(lbIdx,1);
+  if(!lbDays.length){ closeLightbox(); }
+  else { if(lbIdx>=lbDays.length) lbIdx=lbDays.length-1; showLB(); }
+  render();
+});
+document.addEventListener('keydown',e=>{
+  if(!lbEl.classList.contains('open')) return;
+  if(e.key==='Escape') closeLightbox();
+  if(e.key==='ArrowLeft' && lbIdx>0){ lbIdx--; showLB(); }
+  if(e.key==='ArrowRight' && lbIdx<lbDays.length-1){ lbIdx++; showLB(); }
+});
 
 /* ================= статистика ================= */
 function weekStart(day){ // понедельник
