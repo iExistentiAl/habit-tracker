@@ -514,8 +514,9 @@
         <input type="file" id="import-file" accept=".json" style="display:none">
       </div>
       <div class="hint">Данные хранятся только в этом браузере. Чтобы перенести прогресс на другое
-        устройство — сделай экспорт здесь и импорт там. Фото (еда и прогресс) в файл экспорта
-        не входят — они остаются на своём устройстве.</div>
+        устройство — сделай экспорт здесь и импорт там. Фото (еда и прогресс) упаковываются
+        прямо в файл, поэтому он может весить несколько мегабайт. Переносить лучше по AirDrop
+        или кабелю — тогда всё остаётся только у тебя.</div>
     </div>
   </section>
 </div>
@@ -1746,24 +1747,64 @@ function renderStats(){
 }
 
 /* ================= экспорт / импорт ================= */
-document.getElementById('btn-export').addEventListener('click',()=>{
-  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+async function buildExport(){
+  const photos={};
+  const keys=[];
+  for(const day in db.food) for(const m in db.food[day]) keys.push(day+'-'+m);
+  for(const day in db.selfies) keys.push('selfie-'+day);
+  for(const k of keys){
+    try{
+      const b=await photoGet(k);
+      if(!b) continue;
+      photos[k]=await new Promise((res,rej)=>{
+        const r=new FileReader();
+        r.onload=()=>res(r.result); r.onerror=rej;
+        r.readAsDataURL(b);
+      });
+    }catch(e){}
+  }
+  return {version:2, data:db, photos};
+}
+async function applyImport(obj){
+  const isV2 = obj && obj.version===2 && obj.data;
+  const data = isV2 ? obj.data : obj;
+  if(!data || !data.habits || !data.checks) throw new Error('bad');
+  db=data; migrate();
+  const photos = isV2 ? (obj.photos||{}) : {};
+  let n=0;
+  for(const k in photos){
+    try{
+      const blob=await (await fetch(photos[k])).blob();
+      await photoPut(k,blob); dropPhotoURL(k); n++;
+    }catch(e){}
+  }
+  return n;
+}
+document.getElementById('btn-export').addEventListener('click',async ()=>{
+  toast('Собираю данные и фото…');
+  const out=await buildExport();
+  const blob=new Blob([JSON.stringify(out)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='tracker-'+todayKey()+'.json';
   a.click(); URL.revokeObjectURL(a.href);
-  toast('Файл с данными сохранён');
+  const nP=Object.keys(out.photos).length;
+  toast('Файл сохранён'+(nP?' · фото внутри: '+nP:''));
 });
 document.getElementById('btn-import').addEventListener('click',()=>document.getElementById('import-file').click());
 document.getElementById('import-file').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{
+  r.onload=async ()=>{
     try{
-      const data=JSON.parse(r.result);
-      if(!data.habits || !data.checks) throw new Error('bad');
+      const obj=JSON.parse(r.result);
+      const data = obj && obj.version===2 ? obj.data : obj;
+      if(!data || !data.habits || !data.checks) throw new Error('bad');
       if(confirm('Заменить текущие данные данными из файла?')){
-        db=data; migrate(); render(); toast('Данные импортированы ✅');
+        toast('Импортирую…');
+        const n=await applyImport(obj);
+        render();
+        toast('Импортировано ✅'+(n?' · фото: '+n:''));
       }
     }catch(err){ alert('Не получилось прочитать файл — это не экспорт трекера.'); }
     e.target.value='';
