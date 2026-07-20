@@ -1281,11 +1281,11 @@ function renderFood(){
 
 /* ================= спорт ================= */
 const EX_A=[
-  {n:'Приседания (вес тела)', reps:'12–15', tip:'Пятки на полу, колени за носками, спина ровная'},
-  {n:'Отжимания', reps:'8–12', tip:'Начни от стола или стены, со временем — от пола'},
-  {n:'Тяга под столом', reps:'8–12', tip:'Ляг под крепкий стол, тяни грудь к краю столешницы'},
-  {n:'Ягодичный мостик', reps:'12–15', tip:'Позже — вариант на одной ноге'},
-  {n:'Планка', reps:'30–45 сек', hold:40, tip:'Тело одной линией, не проваливай поясницу'},
+  {n:'Приседания (вес тела)', reps:'12–15', tip:'Пятки на полу, колени за носками, спина ровная', img:'images/ex-squat.jpg'},
+  {n:'Отжимания', reps:'8–12', tip:'Начни от стола или стены, со временем — от пола', img:'images/ex-pushup.jpg'},
+  {n:'Тяга под столом', reps:'8–12', tip:'Ляг под крепкий стол, тяни грудь к краю столешницы', img:'images/ex-table-row.jpg'},
+  {n:'Ягодичный мостик', reps:'12–15', tip:'Позже — вариант на одной ноге', img:'images/ex-bridge.jpg'},
+  {n:'Планка', reps:'30–45 сек', hold:40, tip:'Тело одной линией, не проваливай поясницу', img:'images/ex-plank.jpg'},
 ];
 const EX_B=[
   {n:'Выпады назад', reps:'10 на ногу', tip:'Позже — болгарские: задняя нога на стуле'},
@@ -1462,15 +1462,21 @@ function drawPlayer(){
           <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
         </div>`;
     } else {
+      const holding = session.mode==='hold';
       inner=`<h2>💪 Сила ${session.kind} <span class="tag">${session.ex+1} из ${session.list.length}</span></h2>
         <div class="wk-bar"><div style="width:${Math.round(done/total*100)}%"></div></div>
         <div class="ex-name">${ex.n}</div>
         <div class="set-info">Подход ${session.set} из 3 · ${ex.reps}</div>
-        <div class="hint" style="margin-top:6px">💡 ${ex.tip}</div>
+        ${ex.img?'<img class="pose-img" src="'+ex.img+'" alt="">':''}
+        ${holding
+          ? '<div class="timer-big" id="t-big">'+fmtSec(session.left)+'</div>'
+          : '<div class="hint" style="margin-top:6px">💡 '+ex.tip+'</div>'}
         <div class="player-controls">
-          ${ex.hold
-            ? '<button class="btn" id="pl-hold">▶ Держать '+ex.hold+' сек</button>'
-            : '<button class="btn" id="pl-set">✓ Подход выполнен</button>'}
+          ${holding
+            ? '<button class="btn" id="pl-set">✓ Готово досрочно</button>'
+            : ex.hold
+              ? '<button class="btn" id="pl-hold">▶ Держать '+ex.hold+' сек</button>'
+              : '<button class="btn" id="pl-set">✓ Подход выполнен</button>'}
           <button class="btn ghost" id="pl-skipex">Пропустить упражнение</button>
           <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
         </div>`;
