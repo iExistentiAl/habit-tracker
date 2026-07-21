@@ -1354,6 +1354,31 @@ function fmtSec(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 function stopTick(){ if(sTimer){ clearInterval(sTimer); sTimer=null; } }
 function tickEvery(fn){ stopTick(); sTimer=setInterval(fn,1000); }
 
+const HOME_CARDIO=[
+  {em:'🤸', n:'Прыжки «звёздочка»', sec:40, tip:'Ноги в стороны + руки над головой, в ритме. Разгоняет пульс.'},
+  {em:'🏃', n:'Высокие колени',      sec:40, tip:'Бег на месте, колени до пояса, руки работают.'},
+  {em:'🧗', n:'«Скалолаз»',          sec:40, tip:'Упор лёжа, быстро подтягивай колени к груди по очереди.'},
+  {em:'🦵', n:'Приседания с выпрыгом',sec:40, tip:'Присед → мягкий выпрыг вверх. Тяжело — просто быстрые приседания.'},
+  {em:'🦶', n:'Захлёст голени',       sec:40, tip:'Бег на месте, пятками доставай ягодицы.'},
+  {em:'💥', n:'Бёрпи',               sec:40, tip:'Присед → упор лёжа → выпрыг. Тяжело — без прыжка, шагами.'},
+];
+const HOME_REST=20;
+function startHomeCardio(rounds){
+  session={kind:'home', list:HOME_CARDIO, rounds:rounds||2, round:1, ex:0,
+    mode:'hwork', left:HOME_CARDIO[0].sec, paused:false, label:'Кардио дома'};
+  runSessionTimer();
+  drawPlayer();
+}
+function homeAdvance(){
+  if(session.mode==='hwork'){
+    const lastMove = session.ex >= session.list.length-1;
+    if(lastMove && session.round>=session.rounds){ finishWorkout(); return; }
+    session.mode='hrest'; session.left=HOME_REST; drawPlayer(); return;
+  }
+  if(session.ex < session.list.length-1){ session.ex++; }
+  else { session.ex=0; session.round++; }
+  session.mode='hwork'; session.left=session.list[session.ex].sec; drawPlayer();
+}
 const CARDIO_ALTS=[
   {em:'🚴', n:'Велосипед',          g:'30–45 мин ровным темпом, где можешь говорить. Низкая нагрузка на колени.'},
   {em:'🚶', n:'Быстрая ходьба',     g:'40–50 мин бодрым шагом. Самый безопасный вариант — идёт в любой день.'},
@@ -1384,6 +1409,7 @@ function runSessionTimer(){
     if(session.left>0){ updTimerEl(fmtSec(session.left)); return; }
     sndPop();
     if(session.mode==='rest'){ session.mode='work'; stopTick(); drawPlayer(); return; }
+    if(session.mode==='hwork' || session.mode==='hrest'){ homeAdvance(); return; }
     if(session.mode==='hold'){ completeSet(); return; }
     if(session.mode==='pose'){
       const p=POSES[session.ex];
@@ -1445,6 +1471,38 @@ function drawPlayer(){
         <button class="btn" id="pl-done">Завершить ✓</button>
         <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
       </div>`;
+  } else if(session.kind==='home'){
+    const m=session.list[session.ex];
+    const totalMoves=session.list.length*session.rounds;
+    const doneMoves=(session.round-1)*session.list.length + session.ex + (session.mode==='hrest'?1:0);
+    const pct=Math.round(doneMoves/totalMoves*100);
+    if(session.mode==='hrest'){
+      const nxt = session.ex<session.list.length-1 ? session.list[session.ex+1] : session.list[0];
+      inner=`<h2>🏠 Кардио дома <span class="tag">круг ${session.round} из ${session.rounds}</span></h2>
+        <div class="wk-bar"><div style="width:${pct}%"></div></div>
+        <div class="ex-name" style="color:var(--muted)">Отдых 🌬</div>
+        <div class="set-info">дальше: ${nxt.em} ${nxt.n}</div>
+        <div class="timer-big rest" id="t-big">${fmtSec(session.left)}</div>
+        <div class="player-controls">
+          <button class="btn ghost" id="pl-pause">${session.paused?'▶ Продолжить':'⏸ Пауза'}</button>
+          <button class="btn" id="pl-hskip">Пропустить отдых →</button>
+          <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
+        </div>`;
+    } else {
+      inner=`<h2>🏠 Кардио дома <span class="tag">круг ${session.round} из ${session.rounds}</span></h2>
+        <div class="wk-bar"><div style="width:${pct}%"></div></div>
+        <div class="ex-name">${m.em} ${m.n}</div>
+        <div class="set-info">упражнение ${session.ex+1} из ${session.list.length}</div>
+        ${m.img?'<img class="pose-img" src="'+m.img+'" alt="">':''}
+        <div class="timer-big" id="t-big">${fmtSec(session.left)}</div>
+        <div class="hint" style="margin-top:0">💡 ${m.tip}</div>
+        <div class="player-controls">
+          <button class="btn ghost" id="pl-pause">${session.paused?'▶ Продолжить':'⏸ Пауза'}</button>
+          <button class="btn ghost" id="pl-hskip">Дальше →</button>
+          <button class="btn" id="pl-done">Готово ✓</button>
+          <button class="btn ghost" id="pl-quit" style="flex:0 0 auto">✕</button>
+        </div>`;
+    }
   } else if(session.kind==='mob'){
     const p=POSES[session.ex];
     const total=POSES.reduce((a,x)=>a+x.secs*x.sides,0);
@@ -1504,6 +1562,7 @@ function drawPlayer(){
   on('pl-set',()=>{ sndPop(); completeSet(); });
   on('pl-hold',()=>{ session.mode='hold'; session.left=session.list[session.ex].hold; runSessionTimer(); drawPlayer(); });
   on('pl-skiprest',()=>{ session.mode='work'; stopTick(); drawPlayer(); });
+  on('pl-hskip',()=>{ sndPop(); homeAdvance(); });
   on('pl-skipex',()=>{ session.ex++; session.set=1;
     if(session.ex>=session.list.length){ finishWorkout(); } else { session.mode='work'; stopTick(); drawPlayer(); } });
   on('pl-pause',()=>{ session.paused=!session.paused; drawPlayer(); });
@@ -1527,11 +1586,12 @@ function renderSport(){
 
   if(done){
     body='<div class="empty">🏆 Сегодня выполнено: '+(done.name||'тренировка')+'. Отдыхай — или добавь что-то ещё.</div>';
-    alts=[{em:'🧘',n:'Круг мобильности',kind:'mob'},{em:'🚶',n:'Прогулка',kind:'cardio',g:'Лёгкая прогулка 20–30 мин.'}];
+    alts=[{em:'🧘',n:'Круг мобильности',kind:'mob'},{em:'🏠',n:'Кардио дома',home:true},{em:'🚶',n:'Прогулка',kind:'cardio',g:'Лёгкая прогулка 20–30 мин.'}];
     body+=altGrid('Хочешь ещё подвигаться?');
   } else if(s.k==='cardio'){
-    alts=CARDIO_ALTS.map((a,i)=>({em:a.em,n:a.n,kind:'cardio',g:a.g,primary:i===0}));
-    body='<div class="hint" style="margin-top:0">Не получается запланированное — выбери любой вариант с похожей нагрузкой. Таймер один на всех.</div>'+altGrid('Что делаешь сегодня');
+    alts=[{em:'🏠',n:'Кардио дома',home:true,primary:true}]
+      .concat(CARDIO_ALTS.map(a=>({em:a.em,n:a.n,kind:'cardio',g:a.g})));
+    body='<div class="hint" style="margin-top:0">С утра или без зала — начни с <b>кардио дома</b> (упражнения с весом тела, ничего не нужно). Или выбери любой вариант с похожей нагрузкой.</div>'+altGrid('Что делаешь сегодня');
   } else if(s.k==='A'||s.k==='B'){
     const list=s.k==='A'?EX_A:EX_B, other=s.k==='A'?'B':'A';
     body='<ul class="ex-list">'+list.map(e=>'<li><span>'+e.n+'</span><span>3 × '+e.reps+'</span></li>').join('')+'</ul>'+
@@ -1556,7 +1616,8 @@ function renderSport(){
   on('start-mob',()=>startWorkout('mob'));
   box.querySelectorAll('[data-alt]').forEach(b=>{
     b.addEventListener('click',()=>{ const a=alts[+b.dataset.alt];
-      startWorkout(a.kind, a.kind==='cardio'?{n:a.n,g:a.g,em:a.em}:null); });
+      if(a.home) startHomeCardio(2);
+      else startWorkout(a.kind, a.kind==='cardio'?{n:a.n,g:a.g,em:a.em}:null); });
   });
 
   document.getElementById('sport-week').innerHTML=[0,1,2,3,4,5,6].map(i=>{
